@@ -15,6 +15,7 @@
   --gris-claro: #a9b8c6;
   --linea: #d5dfe8;
   --verde: #2b7a4b;
+  --monte: #2f5d46;
   --rojo: #b3261e;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --margen: clamp(16px, 4vw, 56px);
@@ -37,7 +38,7 @@
 .sitio p {
   margin: 0;
 }
-.sitio a {
+:where(.sitio) a {
   color: inherit;
 }
 .sitio :focus-visible {
@@ -369,6 +370,50 @@
   letter-spacing: -0.02em;
   color: var(--tinta);
   line-height: 1.1;
+}
+
+/* Cada cabaña con un color del lugar: cielo, pasto, noche y monte */
+.cabana:nth-child(1) {
+  background: var(--cielo);
+}
+.cabana:nth-child(2) {
+  background: var(--pasto);
+}
+.cabana:nth-child(2) .cabana-personas,
+.cabana:nth-child(2) .cabana-texto p:last-child,
+.cabana:nth-child(2) .cabana-precio {
+  color: var(--tinta);
+}
+.cabana:nth-child(2) .cabana-finde.libre {
+  background: var(--tinta);
+  color: var(--pasto);
+}
+.cabana:nth-child(3),
+.cabana:nth-child(4) {
+  background: var(--tinta);
+  color: var(--blanco);
+}
+.cabana:nth-child(4) {
+  background: var(--monte);
+}
+.cabana:nth-child(3) .cabana-personas,
+.cabana:nth-child(4) .cabana-personas {
+  color: var(--pasto);
+}
+.cabana:nth-child(3) .cabana-texto p:last-child,
+.cabana:nth-child(4) .cabana-texto p:last-child,
+.cabana:nth-child(3) .cabana-precio,
+.cabana:nth-child(4) .cabana-precio {
+  color: #c9d6e2;
+}
+.cabana:nth-child(3) .cabana-precio strong,
+.cabana:nth-child(4) .cabana-precio strong {
+  color: var(--blanco);
+}
+.cabana:nth-child(3) .btn-tinta,
+.cabana:nth-child(4) .btn-tinta {
+  background: var(--pasto);
+  color: var(--tinta);
 }
 
 /* ——— Reservar ——— */
