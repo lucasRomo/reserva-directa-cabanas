@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { negocio, precioNoche, esAlta } from '../config/negocio'
 import { capital, deClave, diaMes, fechaLarga, hoyClave, pesos, sumarDias } from '../lib/formato'
 import { cotizar, noches, ocupado, proximoFinde, reservar, useDatos, type Reserva } from '../lib/datos'
-import { Cartel, Curvas, useRevelar } from '../lib/ui'
+import { Cartel } from '../lib/ui'
 
 const PRODUCTO = 'Reserva Directa'
 const meses = new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric' })
@@ -46,11 +46,10 @@ function Portada() {
 
 function Cabanas({ elegir }: { elegir: (id: string) => void }) {
   const e = useDatos()
-  const ref = useRevelar<HTMLElement>()
   const hoy = hoyClave()
   return (
-    <section id="cabanas" className="cabanas" ref={ref}>
-      <div className="cabanas-intro revela">
+    <section id="cabanas" className="cabanas">
+      <div className="cabanas-intro">
         <h2>Las cuatro cabañas</h2>
         <p>
           Piedra laja de la zona y madera de la sierra. Todas con ropa de cama, vajilla, wifi y estacionamiento. Mascotas
@@ -62,7 +61,7 @@ function Cabanas({ elegir }: { elegir: (id: string) => void }) {
           const finde = proximoFinde(e, c.id)
           const esteFinde = finde && deClave(finde).getTime() - deClave(hoy).getTime() < 7 * 86400000
           return (
-            <li key={c.id} className="cabana revela" style={{ ['--i' as string]: i }}>
+            <li key={c.id} className="cabana" style={{ ['--i' as string]: i }}>
               <div className="cabana-foto">
                 <img src={`img/${c.foto}.jpg`} alt="" width={800} height={600} loading="lazy" />
                 <span className={`cabana-finde ${esteFinde ? 'libre' : ''}`}>
@@ -91,7 +90,6 @@ function Cabanas({ elegir }: { elegir: (id: string) => void }) {
 /** El calendario: cada noche libre con su precio; se elige llegada y salida. */
 function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: string) => void }) {
   const e = useDatos()
-  const ref = useRevelar<HTMLElement>()
   const hoy = hoyClave()
   const [desde, setDesde] = useState<string | null>(null)
   const [hasta, setHasta] = useState<string | null>(null)
@@ -146,8 +144,8 @@ function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: s
   }
 
   return (
-    <section id="reservar" className="reservar" ref={ref}>
-      <div className="reservar-cabeza revela">
+    <section id="reservar" className="reservar">
+      <div className="reservar-cabeza">
         <div>
           <h2>Fechas libres</h2>
           <p>Cada noche libre con su precio. Tocá la llegada y después el día que te vas.</p>
@@ -162,7 +160,7 @@ function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: s
         </div>
       </div>
       <div className="reservar-cuerpo">
-        <div className="calendario revela" data-ui>
+        <div className="calendario" data-ui>
           <div className="calendario-nav">
             <button onClick={() => setMes(Math.max(0, mes - 1))} disabled={mes === 0} aria-label="Meses anteriores">←</button>
             <button onClick={() => setMes(Math.min(5, mes + 1))} aria-label="Meses siguientes">→</button>
@@ -204,8 +202,7 @@ function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: s
           </ul>
         </div>
 
-        <aside className="cotizacion revela">
-          <Curvas semilla={4} cerros={2} niveles={7} />
+        <aside className="cotizacion">
           {hecha ? (
             <div className="cotizacion-cuerpo">
               <p className="cotizacion-sello">Reserva hecha</p>
@@ -253,13 +250,11 @@ function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: s
 }
 
 function Cerca() {
-  const ref = useRevelar<HTMLElement>()
   const [sel, setSel] = useState(negocio.cerca[0].id)
   const x = negocio.cerca.find((c) => c.id === sel)!
   return (
-    <section id="cerca" className="cerca" ref={ref}>
-      <Curvas semilla={7} cerros={3} niveles={10} />
-      <div className="cerca-texto revela">
+    <section id="cerca" className="cerca">
+      <div className="cerca-texto">
         <h2>Qué hay cerca</h2>
         <div className="cerca-pestanas" role="tablist">
           {negocio.cerca.map((c) => (
@@ -272,23 +267,22 @@ function Cerca() {
         <p className="cerca-detalle" key={sel}>{x.texto}</p>
         <a className="btn btn-pasto" href={whatsapp} target="_blank" rel="noreferrer">Preguntar por WhatsApp</a>
       </div>
-      <figure className="cerca-foto revela">
+      <figure className="cerca-foto">
         <img key={x.foto} src={`img/${x.foto}.jpg`} alt={x.titulo} width={1600} height={1200} loading="lazy" />
-        <figcaption>{x.titulo} · {x.dato}</figcaption>
+        <figcaption>{x.titulo}, {x.dato}</figcaption>
       </figure>
     </section>
   )
 }
 
 function Llegar() {
-  const ref = useRevelar<HTMLElement>()
   return (
-    <section id="llegar" className="llegar" ref={ref} aria-labelledby="llegar-titulo">
-      <div className="llegar-cabeza revela">
+    <section id="llegar" className="llegar" aria-labelledby="llegar-titulo">
+      <div className="llegar-cabeza">
         <h2 id="llegar-titulo">Cómo llegar</h2>
         <p>{negocio.direccion}, {negocio.lugar}. Ruta asfaltada hasta Tanti y después 4 km de ripio firme, se entra con cualquier auto.</p>
       </div>
-      <ol className="ruta revela" aria-label="El camino desde Córdoba">
+      <ol className="ruta" aria-label="El camino desde Córdoba">
         {negocio.ruta.map((p) => (
           <li key={p.lugar} className={p.aca ? 'ruta-aca' : ''}>
             {p.tramo && <span className="ruta-tramo">{p.tramo}</span>}
@@ -299,7 +293,7 @@ function Llegar() {
       </ol>
       <div className="llegar-fila">
         <img src="img/punilla.jpg" alt="El valle de Punilla al anochecer, con las luces de los pueblos" width={1800} height={1134} loading="lazy" />
-        <dl className="llegar-datos revela">
+        <dl className="llegar-datos">
           <div><dt>Check-in</dt><dd>desde las {negocio.checkin}</dd></div>
           <div><dt>Check-out</dt><dd>hasta las {negocio.checkout}</dd></div>
           <div><dt>Seña</dt><dd>{Math.round(negocio.seña * 100)}% para confirmar</dd></div>
@@ -313,13 +307,13 @@ function Llegar() {
 export default function Sitio() {
   const [cabana, setCabana] = useState(negocio.cabanas[1].id)
   useEffect(() => {
-    document.title = `${negocio.nombre} · ${negocio.tipo} en ${negocio.lugar}`
+    document.title = `${negocio.nombre}, ${negocio.tipo.toLowerCase()} en ${negocio.lugar}`
   }, [])
   return (
     <div className="sitio">
       <div className="barra-demo">
         <p>Demo de {PRODUCTO} para cabañas y complejos. El complejo es inventado y las reservas son de prueba.</p>
-        <Link to="/admin">Ver el panel del complejo →</Link>
+        <Link to="/admin">Ver el panel del complejo</Link>
       </div>
       <Portada />
       <main>
@@ -329,11 +323,10 @@ export default function Sitio() {
         <Llegar />
       </main>
       <footer className="pie">
-        <Curvas semilla={11} cerros={3} niveles={12} />
         <div className="pie-filas">
           <p>{negocio.tipo} en {negocio.lugar}, {negocio.region}</p>
           <p>
-            <a href={whatsapp}>WhatsApp {negocio.whatsapp}</a> · <a href={`https://instagram.com/${negocio.instagram}`}>Instagram</a> ·{' '}
+            <a href={whatsapp}>WhatsApp {negocio.whatsapp}</a>{'  '}<a href={`https://instagram.com/${negocio.instagram}`}>Instagram</a>{'  '}
             <Link to="/admin">Panel del complejo</Link>
           </p>
         </div>

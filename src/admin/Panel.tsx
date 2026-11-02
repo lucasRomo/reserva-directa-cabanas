@@ -32,7 +32,7 @@ export function Layout() {
   const [reserva, setReserva] = useState<string | null>(null)
   const lugar = useLocation()
   useEffect(() => {
-    document.title = `Panel · ${negocio.nombre}`
+    document.title = `Panel de ${negocio.nombre}`
     setAbierto(false)
   }, [lugar.pathname])
   const ctx = useMemo<Ctx>(() => ({ verReserva: setReserva }), [])
@@ -59,7 +59,7 @@ export function Layout() {
         <div className="lateral-pie">
           <NavLink to="/" className="menu-secundario"><Globe size={16} strokeWidth={1.8} aria-hidden="true" /> Ver la web del complejo</NavLink>
           <button className="menu-secundario" onClick={reiniciar}><RotateCcw size={16} strokeWidth={1.8} aria-hidden="true" /> Reiniciar demo</button>
-          <p className="hecho-con">Hecho con Reserva Directa · demo</p>
+          <p className="hecho-con">Hecho con Reserva Directa, demo</p>
         </div>
       </aside>
       <header className="superior">
@@ -82,7 +82,7 @@ function DetalleReserva({ id, cerrar }: { id: string | null; cerrar: () => void 
   const c = negocio.cabanas.find((x) => x.id === r.cabanaId)!
   const comision = Math.round(r.total * negocio.comision[r.origen])
   return (
-    <Dialogo abierto cerrar={cerrar} titulo={`${c.nombre} · ${r.huesped.split(' · ')[0]}`}>
+    <Dialogo abierto cerrar={cerrar} titulo={`${c.nombre}, ${r.huesped.split(' · ')[0]}`}>
       <dl className="ficha">
         <div><dt>Llega</dt><dd>{capital(fechaLarga(r.desde))}</dd></div>
         <div><dt>Se va</dt><dd>{capital(fechaLarga(r.hasta))}</dd></div>
@@ -130,7 +130,7 @@ export function Ocupacion() {
       <div className="titulo-fila">
         <div>
           <h1>Ocupación</h1>
-          <p>Del {diaMes(inicio)} al {diaMes(sumarDias(fin, -1))} · tocá una reserva para ver el detalle</p>
+          <p>Del {diaMes(inicio)} al {diaMes(sumarDias(fin, -1))}. Tocá una reserva para ver el detalle.</p>
         </div>
         <div className="segmentos">
           <button onClick={() => setInicio(sumarDias(inicio, -14))} aria-label="Antes">←</button>
@@ -226,7 +226,7 @@ export function Ocupacion() {
                   <li key={r.id}>
                     <button onClick={() => verReserva(r.id)}>
                       <span className="lista-hora">{diaMes(t === 'Llegan' ? r.desde : r.hasta)}</span>
-                      <span className="lista-texto">{r.huesped.split(' · ')[0]}<small>{negocio.cabanas.find((c) => c.id === r.cabanaId)!.nombre} · {noches(r)} noches · {origenes[r.origen]}</small></span>
+                      <span className="lista-texto">{r.huesped.split(' · ')[0]}<small>{negocio.cabanas.find((c) => c.id === r.cabanaId)!.nombre}, {noches(r)} noches, {origenes[r.origen]}</small></span>
                       <span className={`estado estado-${r.estado}`}>{estados[r.estado]}</span>
                     </button>
                   </li>
@@ -269,7 +269,7 @@ export function Reservas() {
         <tbody>
           {lista.slice(0, 60).map((r: Reserva) => (
             <tr key={r.id} className="fila-clic" onClick={() => verReserva(r.id)}>
-              <td><strong>{r.huesped.split(' · ')[0]}</strong><small>{r.huesped.split(' · ')[1]} · {r.telefono}</small></td>
+              <td><strong>{r.huesped.split(' · ')[0]}</strong><small>{r.huesped.split(' · ')[1]}, {r.telefono}</small></td>
               <td>{negocio.cabanas.find((c) => c.id === r.cabanaId)!.nombre}</td>
               <td>{diaMes(r.desde)} al {diaMes(r.hasta)}</td>
               <td className="num">{noches(r)}</td>

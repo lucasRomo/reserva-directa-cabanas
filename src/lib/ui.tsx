@@ -58,7 +58,7 @@ export function Cartel({ chico = false }: { chico?: boolean }) {
   return (
     <span className={`cartel ${chico ? 'cartel-chico' : ''}`}>
       <span className="cartel-nombre">Las Lajas</span>
-      <span className="cartel-km">km 4 <span aria-hidden="true">→</span></span>
+      <span className="cartel-km">km 4</span>
     </span>
   )
 }

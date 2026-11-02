@@ -3,9 +3,10 @@
 Demo visual de reservas directas para alojamientos en las Sierras. **Las Lajas** es un complejo inventado para la demo.
 Es todo frontend: las reservas de prueba se generan solas y se guardan en el navegador.
 
-- **Web pública** (`#/`): identidad tomada del lugar (pasto dorado y azul de sierra, el cartel del km 4, curvas de nivel
-  de Los Gigantes, letra Overpass de cartel de ruta). Foto de Los Gigantes a pantalla completa, las cuatro cabañas con su
-  próximo fin de semana libre, un calendario con las noches libres y su precio, el camino desde Córdoba parada por parada, y la cotización que compara el precio directo (10% menos) contra Booking, con seña simulada.
+- **Web pública** (`#/`): colores tomados del lugar (pasto dorado y azul de sierra) y el cartel del km 4. Foto de Los
+  Gigantes, las cuatro cabañas con su próximo fin de semana libre, un calendario con las noches libres y su precio, el
+  camino desde Córdoba parada por parada, y la cotización que compara el precio directo (10% menos) contra Booking, con
+  seña simulada.
 - **Panel del complejo** (`#/admin`): cuadro de ocupación de 4 semanas con el origen de cada reserva y cuántas cabañas
   quedan ocupadas cada noche,
   llegadas y salidas de la semana, lista de reservas, e ingresos con lo pagado en comisiones y lo ahorrado.
