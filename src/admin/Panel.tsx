@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet, useLocation, useOutletContext } from 'react-rout
 import { BarChart3, CalendarRange, Globe, List, Menu, RotateCcw } from 'lucide-react'
 import { negocio } from '../config/negocio'
 import { capital, deClave, diaMes, fechaLarga, hoyClave, pct, pesos, sumarDias } from '../lib/formato'
-import { actualizarReserva, estados, noches, origenes, reiniciar, useDatos, type Origen, type Reserva } from '../lib/datos'
+import { actualizarReserva, estados, noches, ocupado, origenes, reiniciar, useDatos, type Origen, type Reserva } from '../lib/datos'
 import { Dialogo } from '../lib/ui'
 import { Barras } from './Barras'
 
@@ -15,6 +15,15 @@ const menu = [
   { a: '/admin/reservas', texto: 'Reservas', icono: List },
   { a: '/admin/ingresos', texto: 'Ingresos y comisiones', icono: BarChart3 },
 ]
+
+const mesCorto = new Intl.DateTimeFormat('es-AR', { month: 'short' })
+
+/** Nombre para la barra; en las reservas cortas, solo el nombre de pila o el apellido de la familia. */
+const corto = (huesped: string, angosta: boolean) => {
+  const n = huesped.split(' · ')[0]
+  if (n.startsWith('Familia ')) return angosta ? n.slice(8) : `Flia. ${n.slice(8)}`
+  return angosta ? n.split(' ')[0] : n
+}
 
 const tonoOrigen: Record<Origen, string> = { booking: 'origen-booking', airbnb: 'origen-airbnb', directo: 'origen-directo', whatsapp: 'origen-whatsapp' }
 
@@ -32,7 +41,7 @@ export function Layout() {
       <aside className={`lateral ${abierto ? 'lateral-abierta' : ''}`}>
         <div className="producto">
           <span className="producto-marca producto-marca-cerro" aria-hidden="true">
-            <svg viewBox="0 0 32 32" width="32" height="32"><rect width="32" height="32" rx="8" fill="#1f5c49" /><path d="M4 24 L12 12 L17 18 L21 13 L28 24 Z" fill="#f2f2ef" /></svg>
+            <svg viewBox="0 0 32 32" width="36" height="36"><rect width="32" height="32" rx="7" fill="#e9b83a" /><path d="M5 23 L12 12 L16.5 18 L20 13.5 L27 23 Z" fill="#16212c" /></svg>
           </span>
           <span>
             <strong>{negocio.nombre}</strong>
@@ -102,7 +111,7 @@ export function Ocupacion() {
   const { verReserva } = usePanel()
   const hoy = hoyClave()
   const [inicio, setInicio] = useState(sumarDias(hoy, -3))
-  const DIAS = 35
+  const DIAS = 28
   const dias = Array.from({ length: DIAS }, (_, i) => sumarDias(inicio, i))
   const fin = sumarDias(inicio, DIAS)
 
@@ -143,7 +152,9 @@ export function Ocupacion() {
             const dw = deClave(d).getDay()
             return (
               <span key={d} className={`gantt-dia ${dw === 0 || dw === 6 ? 'finde' : ''} ${d === hoy ? 'hoy' : ''}`}>
-                <small>{['D', 'L', 'M', 'M', 'J', 'V', 'S'][dw]}</small>{Number(d.slice(8))}
+                <em>{d.slice(8) === '01' || d === inicio ? mesCorto.format(deClave(d)).replace('.', '') : ''}</em>
+                <small>{['D', 'L', 'M', 'M', 'J', 'V', 'S'][dw]}</small>
+                <b>{Number(d.slice(8))}</b>
               </span>
             )
           })}
@@ -164,11 +175,12 @@ export function Ocupacion() {
                       <button
                         key={r.id}
                         className={`gantt-reserva ${tonoOrigen[r.origen]} ${r.estado === 'consulta' ? 'sin-seña' : ''}`}
-                        style={{ left: `calc(${((a === 0 ? 0 : a + 0.5) / DIAS) * 100}% + 1px)`, width: `calc(${((b + 0.4 - (a === 0 ? 0 : a + 0.5)) / DIAS) * 100}% - 2px)` }}
+                        style={{ left: `calc(${((a === 0 ? 0 : a + 0.5) / DIAS) * 100}% + 1px)`, width: `calc(${((Math.min(DIAS, b + 0.4) - (a === 0 ? 0 : a + 0.5)) / DIAS) * 100}% - 2px)` }}
                         onClick={() => verReserva(r.id)}
                         title={`${r.huesped} · ${origenes[r.origen]}`}
                       >
-                        {r.huesped.split(' · ')[0]}
+                        <strong>{corto(r.huesped, b - a < 2.6)}</strong>
+                        <span>{noches(r)} {b - a < 2.6 ? 'n.' : 'noches'}</span>
                       </button>
                     )
                   })}
@@ -177,6 +189,20 @@ export function Ocupacion() {
               </div>
             )
           })}
+          <div className="gantt-fila gantt-fila-total">
+            <span className="gantt-cabana">Ocupadas<small>de {negocio.cabanas.length} cabañas</small></span>
+            <div className="gantt-pista">
+              {dias.map((d) => {
+                const n = negocio.cabanas.filter((c) => ocupado(e, c.id, d)).length
+                return (
+                  <span key={d} className={`gantt-carga ${n === negocio.cabanas.length ? 'lleno' : ''}`} title={`${diaMes(d)}: ${n} de ${negocio.cabanas.length}`}>
+                    <span style={{ height: `${(n / negocio.cabanas.length) * 100}%` }} />
+                    <small>{n}</small>
+                  </span>
+                )
+              })}
+            </div>
+          </div>
         </div>
         <ul className="leyenda">
           <li><span className="muestra origen-directo" /> Web propia</li>

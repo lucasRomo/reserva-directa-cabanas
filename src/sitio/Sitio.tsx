@@ -1,60 +1,88 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { negocio, precioNoche, esAlta } from '../config/negocio'
-import { capital, deClave, fechaLarga, hoyClave, pesos, sumarDias } from '../lib/formato'
-import { cotizar, noches, ocupado, reservar, useDatos, type Reserva } from '../lib/datos'
-import { useRevelar } from '../lib/ui'
+import { capital, deClave, diaMes, fechaLarga, hoyClave, pesos, sumarDias } from '../lib/formato'
+import { cotizar, noches, ocupado, proximoFinde, reservar, useDatos, type Reserva } from '../lib/datos'
+import { Cartel, Curvas, useRevelar } from '../lib/ui'
 
 const PRODUCTO = 'Reserva Directa'
 const meses = new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric' })
+const whatsapp = `https://wa.me/54${negocio.whatsapp.replace(/\D/g, '')}`
+const desdeBaja = Math.min(...negocio.cabanas.map((c) => c.precio.baja))
 
 function Portada() {
   return (
     <header className="portada" id="inicio">
       <img className="portada-foto" src="img/gigantes.jpg" alt="El macizo de Los Gigantes, en las Sierras Grandes de Córdoba" width={1920} height={1425} />
       <nav className="nav">
-        <span className="nav-lugar">{negocio.tipo} en {negocio.lugar}</span>
+        <Cartel chico />
         <div className="nav-links">
           <a href="#cabanas">Cabañas</a>
-          <a href="#reservar">Disponibilidad</a>
+          <a href="#reservar">Fechas libres</a>
           <a href="#cerca">Qué hay cerca</a>
+          <a href="#llegar">Cómo llegar</a>
         </div>
-        <a href="#reservar" className="btn btn-claro">Ver fechas libres</a>
+        <a href="#reservar" className="btn btn-pasto">Reservar</a>
       </nav>
-      <p className="portada-texto">
-        Cuatro cabañas de piedra y madera en {negocio.lugar}, {negocio.region}, a 40 minutos de Los Gigantes. Reservando acá pagás
-        10% menos que en Booking.
-      </p>
-      <h1 className="portada-nombre" aria-label={`${negocio.nombre}, cabañas en ${negocio.lugar}`}>
-        {negocio.nombre}
-      </h1>
+      <div className="portada-texto">
+        <h1>Cabañas al pie de Los Gigantes</h1>
+        <p>
+          Cuatro cabañas en {negocio.lugar}, {negocio.region}. Reservando acá, directo con nosotros, pagás 10% menos que en Booking.
+        </p>
+        <div className="portada-acciones">
+          <a href="#reservar" className="btn btn-pasto btn-grande">Ver fechas libres</a>
+          <a href={whatsapp} className="btn btn-vidrio btn-grande" target="_blank" rel="noreferrer">Preguntar por WhatsApp</a>
+        </div>
+      </div>
+      <dl className="portada-datos">
+        <div><dt>Cabañas</dt><dd>4</dd></div>
+        <div><dt>Para</dt><dd>2 a 6 personas</dd></div>
+        <div><dt>La noche</dt><dd>desde {pesos(desdeBaja)}</dd></div>
+        <div><dt>Leña</dt><dd>incluida abr–oct</dd></div>
+      </dl>
     </header>
   )
 }
 
 function Cabanas({ elegir }: { elegir: (id: string) => void }) {
+  const e = useDatos()
   const ref = useRevelar<HTMLElement>()
   const hoy = hoyClave()
   return (
     <section id="cabanas" className="cabanas" ref={ref}>
       <div className="cabanas-intro revela">
-        <h2>Las cabañas</h2>
-        <p>Todas con ropa de cama, vajilla, wifi y estacionamiento. Leña incluida de abril a octubre. Mascotas bienvenidas en Molle y Algarrobo.</p>
+        <h2>Las cuatro cabañas</h2>
+        <p>
+          Piedra laja de la zona y madera de la sierra. Todas con ropa de cama, vajilla, wifi y estacionamiento. Mascotas
+          bienvenidas en Molle y Algarrobo.
+        </p>
       </div>
       <ol className="cabanas-lista">
-        {negocio.cabanas.map((c, i) => (
-          <li key={c.id} className="cabana revela" style={{ ['--i' as string]: i }}>
-            <img src={`img/${c.foto}.jpg`} alt="" width={800} height={600} loading="lazy" />
-            <div className="cabana-texto">
-              <h3>{c.nombre}</h3>
-              <p>{c.detalle}</p>
-              <p className="cabana-datos">
-                Hasta {c.personas} personas · desde {pesos(precioNoche(c, hoy))} la noche
-              </p>
-            </div>
-            <button className="enlace" onClick={() => elegir(c.id)}>Ver fechas libres</button>
-          </li>
-        ))}
+        {negocio.cabanas.map((c, i) => {
+          const finde = proximoFinde(e, c.id)
+          const esteFinde = finde && deClave(finde).getTime() - deClave(hoy).getTime() < 7 * 86400000
+          return (
+            <li key={c.id} className="cabana revela" style={{ ['--i' as string]: i }}>
+              <div className="cabana-foto">
+                <img src={`img/${c.foto}.jpg`} alt="" width={800} height={600} loading="lazy" />
+                <span className={`cabana-finde ${esteFinde ? 'libre' : ''}`}>
+                  {finde ? (esteFinde ? 'Libre este finde' : `Próximo finde libre: ${diaMes(finde)}`) : 'Fines de semana completos'}
+                </span>
+              </div>
+              <div className="cabana-texto">
+                <h3>{c.nombre}</h3>
+                <p className="cabana-personas">Hasta {c.personas} personas</p>
+                <p>{c.detalle}</p>
+              </div>
+              <div className="cabana-pie">
+                <p className="cabana-precio">
+                  <strong>{pesos(precioNoche(c, hoy))}</strong> la noche
+                </p>
+                <button className="btn btn-tinta" onClick={() => elegir(c.id)}>Ver fechas</button>
+              </div>
+            </li>
+          )
+        })}
       </ol>
     </section>
   )
@@ -120,11 +148,15 @@ function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: s
   return (
     <section id="reservar" className="reservar" ref={ref}>
       <div className="reservar-cabeza revela">
-        <h2>Fechas libres</h2>
+        <div>
+          <h2>Fechas libres</h2>
+          <p>Cada noche libre con su precio. Tocá la llegada y después el día que te vas.</p>
+        </div>
         <div className="pestanas" role="tablist" aria-label="Cabaña">
           {negocio.cabanas.map((x) => (
             <button key={x.id} role="tab" aria-selected={x.id === cabanaId} className={x.id === cabanaId ? 'activa' : ''} onClick={() => setCabana(x.id)}>
               {x.nombre}
+              <small>{x.personas} pers.</small>
             </button>
           ))}
         </div>
@@ -133,7 +165,6 @@ function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: s
         <div className="calendario revela" data-ui>
           <div className="calendario-nav">
             <button onClick={() => setMes(Math.max(0, mes - 1))} disabled={mes === 0} aria-label="Meses anteriores">←</button>
-            <span>Tocá la noche de llegada y después el día de salida</span>
             <button onClick={() => setMes(Math.min(5, mes + 1))} aria-label="Meses siguientes">→</button>
           </div>
           <div className="meses">
@@ -147,11 +178,12 @@ function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: s
                     const pasado = d < hoy
                     const lleno = !pasado && ocupado(e, cabanaId, d)
                     const enRango = desde && (hasta ? d >= desde && d <= hasta : d === desde)
+                    const borde = d === desde || d === hasta
                     const salidaPosible = desde && !hasta && d > desde && lleno && libreRango(desde, d)
                     return (
                       <button
                         key={d}
-                        className={`dia ${lleno ? 'lleno' : ''} ${enRango ? 'elegido' : ''} ${esAlta(d) ? 'alta' : ''}`}
+                        className={`dia ${lleno ? 'lleno' : ''} ${enRango ? 'elegido' : ''} ${borde ? 'borde' : ''} ${esAlta(d) ? 'alta' : ''}`}
                         disabled={pasado || (lleno && !salidaPosible)}
                         onClick={() => tocar(d)}
                         aria-label={`${fechaLarga(d)}${lleno ? ', ocupada' : `, ${pesos(precioNoche(c, d))}`}`}
@@ -165,25 +197,35 @@ function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: s
               </div>
             ))}
           </div>
-          <p className="calendario-leyenda"><span className="muestra-alta" /> Temporada alta · las noches tachadas ya están reservadas · precios por noche en miles de pesos</p>
+          <ul className="calendario-leyenda">
+            <li><span className="muestra muestra-libre" /> Libre, precio por noche en miles</li>
+            <li><span className="muestra muestra-alta" /> Temporada alta</li>
+            <li><span className="muestra muestra-lleno" /> Ya reservada</li>
+          </ul>
         </div>
 
         <aside className="cotizacion revela">
+          <Curvas semilla={4} cerros={2} niveles={7} />
           {hecha ? (
-            <>
-              <h3>¡Reservado, {hecha.huesped.split(' ')[0]}!</h3>
+            <div className="cotizacion-cuerpo">
+              <p className="cotizacion-sello">Reserva hecha</p>
+              <h3>¡Listo, {hecha.huesped.split(' ')[0]}!</h3>
               <p>{c.nombre}, del {fechaLarga(hecha.desde)} al {fechaLarga(hecha.hasta)}. {hecha.estado === 'señada' ? 'Seña recibida.' : 'Te escribimos por WhatsApp para la seña.'}</p>
               <p>Check-in desde las {negocio.checkin}. Te mandamos la ubicación exacta por WhatsApp.</p>
-              <Link className="btn btn-acento" to="/admin">Así lo ve el complejo</Link>
-            </>
+              <Link className="btn btn-pasto" to="/admin">Así lo ve el complejo</Link>
+            </div>
           ) : !desde || !hasta ? (
-            <>
+            <div className="cotizacion-cuerpo">
+              <img src={`img/${c.foto}.jpg`} alt="" width={800} height={600} />
               <h3>{c.nombre}</h3>
               <p>{c.detalle} Hasta {c.personas} personas.</p>
-              <p className="tenue">Elegí las fechas en el calendario. Mínimo {minimo} noches{minimo === 3 ? ' en temporada alta' : ''}.</p>
-            </>
+              <p className="tenue">
+                {desde ? `Llegada: ${fechaLarga(desde)}. Ahora tocá el día que te vas.` : 'Elegí las fechas en el calendario.'} Mínimo {minimo} noches
+                {minimo === 3 ? ' en temporada alta' : ''}.
+              </p>
+            </div>
           ) : (
-            <form onSubmit={confirmar}>
+            <form className="cotizacion-cuerpo" onSubmit={confirmar}>
               <h3>{n} {n === 1 ? 'noche' : 'noches'} en {c.nombre}</h3>
               <p className="tenue">{capital(fechaLarga(desde))} al {fechaLarga(hasta)}</p>
               <dl>
@@ -201,7 +243,7 @@ function Reservar({ cabanaId, setCabana }: { cabanaId: string; setCabana: (id: s
                   {pago === 'pagando' ? 'Procesando…' : `Señar ${pesos(Math.round(directo * negocio.seña))} con Mercado Pago`}
                 </button>
               )}
-              <button className="btn btn-acento" disabled={n < minimo || !nombre || !tel}>{pago === 'ok' ? 'Confirmar reserva' : 'Pedir la reserva'}</button>
+              <button className="btn btn-pasto" disabled={n < minimo || !nombre || !tel}>{pago === 'ok' ? 'Confirmar reserva' : 'Pedir la reserva'}</button>
             </form>
           )}
         </aside>
@@ -216,27 +258,24 @@ function Cerca() {
   const x = negocio.cerca.find((c) => c.id === sel)!
   return (
     <section id="cerca" className="cerca" ref={ref}>
-      <div className="cerca-foto revela">
+      <Curvas semilla={7} cerros={3} niveles={10} />
+      <div className="cerca-texto revela">
+        <h2>Qué hay cerca</h2>
+        <div className="cerca-pestanas" role="tablist">
+          {negocio.cerca.map((c) => (
+            <button key={c.id} role="tab" aria-selected={c.id === sel} className={c.id === sel ? 'activa' : ''} onClick={() => setSel(c.id)}>
+              <strong>{c.titulo}</strong>
+              <span>{c.dato}</span>
+            </button>
+          ))}
+        </div>
+        <p className="cerca-detalle" key={sel}>{x.texto}</p>
+        <a className="btn btn-pasto" href={whatsapp} target="_blank" rel="noreferrer">Preguntar por WhatsApp</a>
+      </div>
+      <figure className="cerca-foto revela">
         <img key={x.foto} src={`img/${x.foto}.jpg`} alt={x.titulo} width={1600} height={1200} loading="lazy" />
-      </div>
-      <div className="cerca-texto">
-        <div className="revela">
-          <h2>Qué hay cerca</h2>
-          <div className="pestanas pestanas-texto" role="tablist">
-            {negocio.cerca.map((c) => (
-              <button key={c.id} role="tab" aria-selected={c.id === sel} className={c.id === sel ? 'activa' : ''} onClick={() => setSel(c.id)}>{c.titulo}</button>
-            ))}
-          </div>
-        </div>
-        <div className="revela" key={sel}>
-          <p className="cerca-dato">{x.dato}</p>
-          <p>{x.texto}</p>
-        </div>
-        <div className="cerca-acciones revela">
-          <a className="celda celda-tinta" href="#reservar">Ver fechas libres</a>
-          <a className="celda celda-tono" href={`https://wa.me/54${negocio.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noreferrer">Consultar por WhatsApp</a>
-        </div>
-      </div>
+        <figcaption>{x.titulo} · {x.dato}</figcaption>
+      </figure>
     </section>
   )
 }
@@ -244,18 +283,28 @@ function Cerca() {
 function Llegar() {
   const ref = useRevelar<HTMLElement>()
   return (
-    <section className="llegar" ref={ref} aria-labelledby="llegar-titulo">
-      <img src="img/punilla.jpg" alt="El valle de Punilla al atardecer, con las luces de los pueblos" width={1800} height={1134} loading="lazy" />
-      <div className="llegar-tarjeta revela">
+    <section id="llegar" className="llegar" ref={ref} aria-labelledby="llegar-titulo">
+      <div className="llegar-cabeza revela">
         <h2 id="llegar-titulo">Cómo llegar</h2>
-        <p>{negocio.direccion}, {negocio.lugar}</p>
-        <dl>
-          <div><dt>Desde Córdoba</dt><dd>1 h 10 min</dd></div>
-          <div><dt>Desde Carlos Paz</dt><dd>25 min</dd></div>
+        <p>{negocio.direccion}, {negocio.lugar}. Ruta asfaltada hasta Tanti y después 4 km de ripio firme, se entra con cualquier auto.</p>
+      </div>
+      <ol className="ruta revela" aria-label="El camino desde Córdoba">
+        {negocio.ruta.map((p) => (
+          <li key={p.lugar} className={p.aca ? 'ruta-aca' : ''}>
+            {p.tramo && <span className="ruta-tramo">{p.tramo}</span>}
+            <span className="ruta-punto" aria-hidden="true" />
+            <strong>{p.aca ? <Cartel /> : p.lugar}</strong>
+          </li>
+        ))}
+      </ol>
+      <div className="llegar-fila">
+        <img src="img/punilla.jpg" alt="El valle de Punilla al anochecer, con las luces de los pueblos" width={1800} height={1134} loading="lazy" />
+        <dl className="llegar-datos revela">
           <div><dt>Check-in</dt><dd>desde las {negocio.checkin}</dd></div>
           <div><dt>Check-out</dt><dd>hasta las {negocio.checkout}</dd></div>
+          <div><dt>Seña</dt><dd>{Math.round(negocio.seña * 100)}% para confirmar</dd></div>
+          <div><dt>WhatsApp</dt><dd><a href={whatsapp} target="_blank" rel="noreferrer">{negocio.whatsapp}</a></dd></div>
         </dl>
-        <a className="btn btn-acento btn-ancho" href="#reservar">Ver fechas libres</a>
       </div>
     </section>
   )
@@ -280,18 +329,20 @@ export default function Sitio() {
         <Llegar />
       </main>
       <footer className="pie">
+        <Curvas semilla={11} cerros={3} niveles={12} />
         <div className="pie-filas">
           <p>{negocio.tipo} en {negocio.lugar}, {negocio.region}</p>
           <p>
-            <a href={`https://wa.me/54${negocio.whatsapp.replace(/\D/g, '')}`}>WhatsApp {negocio.whatsapp}</a> ·{' '}
-            <a href={`https://instagram.com/${negocio.instagram}`}>Instagram</a> · <Link to="/admin">Panel del complejo</Link>
+            <a href={whatsapp}>WhatsApp {negocio.whatsapp}</a> · <a href={`https://instagram.com/${negocio.instagram}`}>Instagram</a> ·{' '}
+            <Link to="/admin">Panel del complejo</Link>
           </p>
         </div>
         <p className="pie-nombre">{negocio.nombre}</p>
         <p className="creditos">
           Fotos vía Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:LosGigantes.jpg">Los Gigantes</a> de Adrián Alberto Ruiz (CC BY 2.5);{' '}
-          <a href="https://commons.wikimedia.org/wiki/File:Valle_De_Punilla_de_noche.jpg">Valle de Punilla</a> y{' '}
-          <a href="https://commons.wikimedia.org/wiki/File:Punilla_valley_panoramic.jpg">panorámica</a> de Mikh Luna (CC BY-SA 4.0);{' '}
+          <a href="https://commons.wikimedia.org/wiki/File:Sierras_de_C%C3%B3rdoba_cerca_de_Nono_2009-11.jpg">Sierras cerca de Nono</a> de *ASTOR* (CC BY-SA 2.0);{' '}
+          <a href="https://commons.wikimedia.org/wiki/File:Tanti_11.jpg">Tanti</a> de Jmmuguerza (CC BY-SA 4.0);{' '}
+          <a href="https://commons.wikimedia.org/wiki/File:Valle_De_Punilla_de_noche.jpg">Valle de Punilla</a> de Mikh Luna (CC BY-SA 4.0);{' '}
           <a href="https://commons.wikimedia.org/wiki/File:Rio_San_Antonio.jpg">Río San Antonio</a> de Flores del Sur (CC BY-SA 4.0);{' '}
           <a href="https://commons.wikimedia.org/wiki/File:Classic_wood-burning_stove_in_a_cozy_cabin_setting_near_nature.jpg">salamandra</a> de Shixart1985 (CC BY 2.0);{' '}
           <a href="https://commons.wikimedia.org/wiki/File:Daly_Creek_Patrol_Cabin-_wood_stove_and_table_(53069042146).jpg">interior de cabaña</a>, Yellowstone NPS (dominio público).

@@ -1,3 +1,9 @@
+/* Overpass dibuja el punto medio corrido a la izquierda; ese solo carácter sale de la letra del sistema. */
+@font-face {
+  font-family: 'Punto';
+  src: local('Arial'), local('Helvetica'), local('Roboto');
+  unicode-range: U+00B7;
+}
 *,
 *::before,
 *::after {
@@ -9,7 +15,7 @@ html {
 }
 body {
   margin: 0;
-  background: #b8b8b4;
+  background: #16212c;
   -webkit-font-smoothing: antialiased;
 }
 img {
@@ -21,8 +27,8 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 ::selection {
-  background: #b3211d;
-  color: #fff;
+  background: #e9b83a;
+  color: #16212c;
 }
 @media (prefers-reduced-motion: reduce) {
   html {

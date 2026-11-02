@@ -28,3 +28,6 @@ dist-ssr
 
 # Herramientas locales de Claude (skills, launch)
 .claude/
+
+# Descargas originales de fotos (las usadas van a public/img)
+assets/

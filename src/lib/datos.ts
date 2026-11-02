@@ -131,3 +131,13 @@ export function reservar(d: Omit<Reserva, 'id' | 'estado' | 'creada' | 'total' |
 }
 export const actualizarReserva = (id: string, c: Partial<Reserva>) =>
   guardar({ ...estado, reservas: estado.reservas.map((x) => (x.id === id ? { ...x, ...c } : x)) })
+
+/** El próximo viernes con las noches de viernes y sábado libres en esa cabaña. */
+export function proximoFinde(e: Estado, cabanaId: string) {
+  const hoy = hoyClave()
+  let vie = sumarDias(hoy, (5 - deClave(hoy).getDay() + 7) % 7)
+  for (let i = 0; i < 12; i++, vie = sumarDias(vie, 7)) {
+    if (!ocupado(e, cabanaId, vie) && !ocupado(e, cabanaId, sumarDias(vie, 1))) return vie
+  }
+  return null
+}

@@ -30,13 +30,22 @@ export const negocio = {
     { id: 'molle', nombre: 'Molle', personas: 2, detalle: 'Monoambiente con hogar a leña y deck mirando al cerro.', foto: 'salamandra', precio: { baja: 62000, alta: 95000 } },
     { id: 'algarrobo', nombre: 'Algarrobo', personas: 4, detalle: 'Dos ambientes, salamandra y parrilla propia.', foto: 'mesa', precio: { baja: 84000, alta: 128000 } },
     { id: 'quebracho', nombre: 'Quebracho', personas: 4, detalle: 'Dos dormitorios, galería y bajada propia al arroyo.', foto: 'rio', precio: { baja: 89000, alta: 136000 } },
-    { id: 'casona', nombre: 'La Casona', personas: 6, detalle: 'Tres dormitorios, cocina grande, quincho y pileta compartida.', foto: 'panoramica', precio: { baja: 138000, alta: 210000 } },
+    { id: 'casona', nombre: 'La Casona', personas: 6, detalle: 'Tres dormitorios, cocina grande, quincho y pileta compartida.', foto: 'sierra', precio: { baja: 138000, alta: 210000 } },
   ] as Cabana[],
+
+  /** El camino desde Córdoba, parada por parada, con el tiempo de cada tramo. */
+  ruta: [
+    { lugar: 'Córdoba', tramo: '' },
+    { lugar: 'Carlos Paz', tramo: '45 min' },
+    { lugar: 'Tanti', tramo: '15 min' },
+    { lugar: 'Las Lajas', tramo: '10 min', aca: true },
+    { lugar: 'Los Gigantes', tramo: '40 min' },
+  ] as { lugar: string; tramo: string; aca?: boolean }[],
 
   cerca: [
     { id: 'rio', titulo: 'El arroyo', texto: 'A 300 metros, con ollas para bañarse de diciembre a marzo. Bajada propia desde Quebracho.', foto: 'rio', dato: '5 min caminando' },
     { id: 'cerros', titulo: 'Los Gigantes', texto: 'El macizo más alto de las Sierras Grandes, con trekking guiado de un día. Salimos desde la tranquera.', foto: 'gigantes', dato: '40 min en auto' },
-    { id: 'pueblo', titulo: 'Tanti y Carlos Paz', texto: 'Almacén, panadería y feria los sábados en Tanti. Teatros, lago y restaurantes en Carlos Paz.', foto: 'punilla', dato: '10 y 25 min' },
+    { id: 'pueblo', titulo: 'Tanti y Carlos Paz', texto: 'Almacén, panadería y feria los sábados en Tanti. Teatros, lago y restaurantes en Carlos Paz.', foto: 'tanti', dato: '10 y 25 min' },
   ],
 }
 

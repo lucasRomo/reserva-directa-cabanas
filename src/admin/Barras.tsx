@@ -32,6 +32,7 @@ export function Barras({
             aria-label={`${d.detalle ?? d.etiqueta}: ${formato(d.valor)}`}
           >
             <span className="barra-relleno" style={{ height: `${(d.valor / max) * 100}%` }} />
+            <span className="barra-etiqueta" aria-hidden="true">{d.etiqueta}</span>
             {sobre === i && (
               <span className="barra-nota">
                 <strong>{formato(d.valor)}</strong>
