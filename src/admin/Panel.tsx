@@ -264,7 +264,7 @@ export function Reservas() {
           <button key={id} role="tab" aria-selected={filtro === id} className={filtro === id ? 'activa' : ''} onClick={() => setFiltro(id)}>{t}</button>
         ))}
       </div>
-      <table className="tabla">
+      <table className="tabla tabla-tarjetas tabla-reservas">
         <thead><tr><th>Huésped</th><th>Cabaña</th><th>Fechas</th><th className="num">Noches</th><th>Origen</th><th>Estado</th><th className="num">Total</th></tr></thead>
         <tbody>
           {lista.slice(0, 60).map((r: Reserva) => (
@@ -331,7 +331,7 @@ export function Ingresos() {
       </section>
       <section className="tarjeta">
         <div className="tarjeta-cabeza"><h2>De dónde vienen las reservas</h2></div>
-        <table className="tabla">
+        <table className="tabla tabla-canales">
           <thead><tr><th>Canal</th><th className="num">Reservas</th><th /><th className="num">Monto</th><th className="num">Comisión</th></tr></thead>
           <tbody>
             {r.porOrigen.map((x) => (
